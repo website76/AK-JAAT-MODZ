@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from tksmod.online/TKSSERVER/ by HTTrack Website Copier/3.x [XR&CO'2017], Sun, 10 Nov 2024 08:25:05 GMT -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Display</title>
+    <style>
+        @import url('../../external.html?link=https://fonts.googleapis.com/css2?family=Orbitron:wght@500&amp;family=Roboto+Mono:wght@400;700&amp;display=swap');
+
+        body {
+          
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0f0f1f;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 280px;
+            padding: 25px;
+            background: linear-gradient(145deg, #1a1a2e, #222237);
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(128, 0, 128, 0.8), 0 0 30px rgba(0, 128, 255, 0.6);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff66ff;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 102, 255, 0.8), 0 0 20px rgba(128, 0, 255, 0.5);
+        }
+
+        .box {
+            margin: 15px 0;
+            padding: 15px;
+            background: linear-gradient(145deg, #191933, #22223d);
+            border-radius: 12px;
+            border: none;
+            box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.3), inset -4px -4px 8px rgba(50, 50, 70, 0.5);
+            color: #ffffff;
+        }
+
+        #timer {
+            color: #ffb74d;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        #currentResult {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.9em;
+            color: #ff66ff;
+            text-shadow: 0 0 8px rgba(255, 102, 255, 0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .animated {
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: linear-gradient(145deg, #1b1b2f, #2b2b40);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(128, 0, 255, 0.4), 0 0 20px rgba(128, 0, 255, 0.2);
+        }
+
+        .history-item .period {
+            width: 60%;
+            font-size: 1em;
+            font-weight: bold;
+            color: #ffb3ff;
+            text-shadow: 0 0 5px rgba(255, 102, 255, 0.5);
+        }
+
+        .history-item .result {
+            width: 35%;
+            font-size: 1em;
+            text-align: right;
+            color: #ff66ff;
+            text-shadow: 0 0 5px rgba(128, 0, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+        }
+        /* Overlay watermark */
+.watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  opacity: 0.3;
+  transform: rotate(-45deg);
+  font-size: 4rem;
+  color: rgba(255, 255, 255, 0.5);
+  z-index: 1000;
+  pointer-events: none;
+}
+    </style>
+</head>
+<body>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';">
+<div class="container">
+    <h1>TKS 𝙐𝙇𝙏𝙄𝙈𝘼𝙏𝙀</h1>
+
+    <div class="box">
+        <div>Period Number</div>
+<div class="game-id"><div class="issue-number"id="period-number">Loading...</div></div>
+    </div>
+
+    <div class="box">
+        <div>Timer</div>
+        <div id="timer">01:00</div>
+    </div>
+
+    <div class="box">
+        <div>Current Result</div>
+<div class="big-small"><div id="result" class="result"></div></div>
+    </div>
+    <br>
+
+    <div class="box">
+        <div>THIS IS FREE MOD</div>
+        <p>
+         MADE BY = @TKS091
+        </p>
+        <p>
+          SERVER:- 17.9 CONNECTED ☑
+        </p>
+    </div>
+</div>
+ <script>
+
+let currentPeriod = "";
+
+
+
+function getCurrentPeriod() {
+    const now = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+    const currentDate = new Date(now);
+    const periodDate = currentDate.toISOString().split('T')[0].replace(/-/g, '');
+    const totalMinutes = currentDate.getHours() * 60 + currentDate.getMinutes() + 1;
+    const periodNumber = String(totalMinutes).padStart(4, '0');
+    return periodDate + periodNumber;
+}
+
+
+function predict() {
+    const options = ["BIG", "SMALL"];
+    const randomIndex = Math.floor(Math.random() * options.length);
+    return options[randomIndex];
+}
+
+
+function checkAndRefreshPeriod() {
+    const newPeriod = getCurrentPeriod();
+
+
+    if (newPeriod !== currentPeriod) {
+        currentPeriod = newPeriod; 
+        location.reload();
+    }
+}
+
+
+function updatePrediction() {
+    document.getElementById('result').textContent = predict(); 
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    currentPeriod = getCurrentPeriod(); 
+    updatePrediction();
+
+  
+    setInterval(checkAndRefreshPeriod, 1000); 
+});
+
+
+</script>
+    <script>
+async function fetchCurrentGameIssue() {
+  const apiUrl = '../../external.html?link=https://api.bdg88zf.com/api/webapi/GetGameIssue';
+  const requestData = {
+    "typeId": 1,
+    "language": 0,
+    "random": "40079dcba93a48769c6ee9d4d4fae23f",
+    "signature": "D12108C4F57C549D82B23A91E0FA20AE",
+    "timestamp": 1727792520
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Accept': 'application/json, text/plain, */*'
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.code === 0) {
+        updateTimer(data.data);
+      } else {
+        console.error('Failed to fetch game issue:', data.msg);
+      }
+    } else {
+      console.error('Network response was not ok:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+  }
+}
+
+function updateTimer(data) {
+  const periodNumber = document.getElementById('period-number');
+  periodNumber.textContent = data.issueNumber;
+
+  const endTime = new Date(data.endTime).getTime();
+  const interval = setInterval(() => {
+    const now = new Date().getTime();
+    const distance = endTime - now;
+
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+    document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+
+    if (distance < 0) {
+      clearInterval(interval);
+      document.getElementById('minutes').textContent = "00";
+      document.getElementById('seconds').textContent = "00";
+    
+      fetchCurrentGameIssue();
+      fetchPreviousResults();   
+    }
+  }, 1000);
+}
+async function fetchPreviousResults() {
+  const apiUrl = '../../external.html?link=https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList';
+  const requestData = {
+    "pageSize": 10,
+    "pageNo": 1,
+    "typeId": 1,
+    "language": 0,
+    "random": "c2505d9138da4e3780b2c2b34f2fb789",
+    "signature": "7D637E060DA35C0C6E28DC6D23D71BED",
+    "timestamp": 1727792520
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Accept': 'application/json, text/plain, */*'
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.code === 0) {
+        updatePreviousResults(data.data.list);
+      } else {
+        console.error('Failed to fetch previous results:', data.msg);
+      }
+    } else {
+      console.error('Network response was not ok:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+  }
+}
+function updatePreviousResults(resultList) {
+  const historyTable = document.getElementById('history-list');
+  historyTable.innerHTML = ''; 
+  resultList.forEach(result => {
+    const { issueNumber, number, colour } = result;
+    const size = number <= 4 ? 'SMALL' : 'BIG'; 
+
+
+    const row = document.createElement('tr');
+
+    const issueCell = document.createElement('td');
+    issueCell.textContent = issueNumber;
+    row.appendChild(issueCell);
+
+    const numberCell = document.createElement('td');
+    numberCell.textContent = number;
+    row.appendChild(numberCell);
+
+    const sizeCell = document.createElement('td');
+    sizeCell.textContent = size;
+    row.appendChild(sizeCell);
+
+    const colourCell = document.createElement('td');
+    colourCell.textContent = colour.toUpperCase();
+    row.appendChild(colourCell);
+
+   
+    historyTable.appendChild(row);
+  });
+
+  
+  if (resultList.length >= 5) {
+    const latestFiveResults = resultList.slice(0, 5);
+    updateBalls(latestFiveResults);
+  }
+}
+
+function updateBalls(results) {
+  const balls = document.querySelectorAll('.ball');
+  
+  results.forEach((result, index) => {
+    if (balls[index]) {
+      const colour = result.colour.toLowerCase();
+      balls[index].textContent = result.number;
+      balls[index].className = 'ball';  
+      balls[index].classList.add(colour); 
+    }
+  });
+}
+
+
+fetchCurrentGameIssue();
+
+
+fetchPreviousResults();
+setInterval(fetchPreviousResults, 60000);
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tableContainer = document.createElement('div');
+  const table = document.createElement('table');
+  const tableHeader = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+
+  
+  headers.forEach(headerText => {
+    const header = document.createElement('th');
+    header.textContent = headerText;
+    headerRow.appendChild(header);
+  });
+
+  tableHeader.appendChild(headerRow);
+  table.appendChild(tableHeader);
+  const tableBody = document.createElement('tbody');
+  tableBody.id = 'history-list'; 
+  table.appendChild(tableBody);
+  tableContainer.appendChild(table);
+  document.body.appendChild(tableContainer); 
+});
+
+</script>
+
+<script>
+    const periodNumberElement = document.getElementById('periodNumber');
+    const timerElement = document.getElementById('timer');
+    const currentResultElement = document.getElementById('currentResult');
+    const historyElement = document.getElementById('history');
+
+    const results = [
+        'SMALL', 'BIG', 'SMALL', 'SMALL', 'BIG', 'GREEN', 'RED', 'SMALL', 'RED', 'GREEN',
+        'SMALL', 'BIG', 'GREEN', 'BIG', 'BIG', 'GREEN', 'SMALL', 'RED', 'SMALL', 'SMALL',
+        'BIG', 'SMALL', 'SMALL', 'BIG', 'RED', 'GREEN', 'BIG', 'SMALL', 'SMALL', 'RED',
+        'SMALL', 'BIG', 'SMALL', 'BIG', 'BIG', 'SMALL', 'BIG', 'SMALL', 'SMALL', 'BIG'
+    ];
+
+    let currentResultIndex = -1;
+    let lastDisplayedPeriod = -1;
+
+    function updatePeriodAndResult() {
+        const now = new Date();
+        const utcYear = now.getUTCFullYear();
+        const utcMonth = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const utcDay = String(now.getUTCDate()).padStart(2, '0');
+        const utcHours = now.getUTCHours();
+        const utcMinutes = now.getUTCMinutes();
+
+        const totalMinutes = utcHours * 60 + utcMinutes;
+        const periodNumber = 10001 + totalMinutes;
+        const periodString = `${utcYear}${utcMonth}${utcDay}1000${periodNumber}`;
+
+        periodNumberElement.textContent = periodString;
+
+        if (periodNumber !== lastDisplayedPeriod && currentResultIndex < results.length - 1) {
+            currentResultIndex++;
+            const result = results[currentResultIndex];
+            currentResultElement.textContent = result;
+            currentResultElement.classList.add('animated');
+            
+            setTimeout(() => currentResultElement.classList.remove('animated'), 500);
+
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="period">${periodString}</div>
+                <div class="result">${result}</div>
+            `;
+            historyElement.prepend(historyItem);
+
+            lastDisplayedPeriod = periodNumber;
+        }
+    }
+
+    function startTimer() {
+        setInterval(() => {
+            const now = new Date();
+            const remainingSeconds = 60 - (now.getUTCSeconds() % 60);
+            const secondsDisplay = remainingSeconds.toString().padStart(2, '0');
+            timerElement.textContent = `00:${secondsDisplay}`;
+
+            if (remainingSeconds === 60) {
+                updatePeriodAndResult();
+            }
+        }, 1000);
+    }
+
+    window.onload = startTimer;
+</script>
+<script>
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+  
+  document.onkeydown = function(e) {
+    if (e.key == "F12" || (e.ctrlKey && e.shiftKey && (e.key == "I" || e.key == "C" || e.key == "J"))) {
+      return false;
+    }
+  };
+</script>
+
+</body>
+
+<!-- Mirrored from tksmod.online/TKSSERVER/ by HTTrack Website Copier/3.x [XR&CO'2017], Sun, 10 Nov 2024 08:25:05 GMT -->
+</html>
